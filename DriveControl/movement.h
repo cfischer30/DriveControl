@@ -33,7 +33,7 @@ void moveControl(){
   GyroZ -= GyroErrorZ;
   yaw += GyroZ * elapsedTime;
   angle = yaw;
-  Serial.print("Curent Angle = ");Serial.println(angle);
+  Serial.print("Current Angle = ");Serial.println(angle);
   driving();
   }
 
@@ -45,7 +45,7 @@ void driving (){//called by void loop(), which isDriving = true
   Serial.print("deltaAngle = ");Serial.println(deltaAngle);  
   forward();  // sets direction
   //if (deltaAngle != 0){
-    if (deltaAngle > angleTolerance){
+    if (abs(deltaAngle) > angleTolerance){
    
     Serial.print("before left right speed "); 
     Serial.print(leftSpeedVal); Serial.print(" "); Serial.println(rightSpeedVal);    
@@ -65,11 +65,13 @@ void controlSpeed(){//this function is called by driving ()
   
   //setting up propoertional control, see Step 3 on the website
   if (deltaAngle > 30){
-      targetGyroZ = 60;
+     // targetGyroZ = 60;
+     targetGyroZ = maxRate;
   } else if (deltaAngle < -30){
-    targetGyroZ = -60;
+    // targetGyroZ = -60;
+    targetGyroZ = -maxRate;    
   } else {
-    targetGyroZ = 2 * deltaAngle;
+    targetGyroZ = proportionalRate * deltaAngle;
   }
   
   if (round(targetGyroZ - GyroZ) == 0){
@@ -98,7 +100,7 @@ void rotate (){//called by void loop(), which isDriving = false
     if (abs(deltaAngle) > 30){
       targetGyroZ = 60;
     } else {
-      targetGyroZ = 2 * abs(deltaAngle);
+      targetGyroZ = proportionalRate * abs(deltaAngle);
     }
     
     if (round(targetGyroZ - abs(GyroZ)) == 0){

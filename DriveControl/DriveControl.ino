@@ -11,13 +11,15 @@ float roll, pitch, yaw;
 float AccErrorX, AccErrorY, GyroErrorX, GyroErrorY, GyroErrorZ;
 float elapsedTime, currentTime, previousTime;
 int c = 0;
+float proportionalRate = 10;
+float maxRate = 120;
 
-const int maxSpeed = 150; //max PWM value written to motor speed pin. It is typically 255.
+const int maxSpeed = 255; //max PWM value written to motor speed pin. It is typically 255.
 const int minSpeed = 80; //min PWM value at which motor moves
 float angle; //due to how I orientated my MPU6050 on my car, angle = roll
 float targetAngle = 0;
 int targetSpeed = 180;
-float angleTolerance = 5;
+float angleTolerance = .1;
 
 const int left1 = 4;
 const int left2 = 5;
@@ -63,11 +65,13 @@ void loop() {
     timeNow = millis();
     rightSpeedVal = targetSpeed;
     leftSpeedVal = targetSpeed;
-    while((timeNow-timeStart) < 10000){
+    while((timeNow-timeStart) < 5000){
       //Serial.print("TimeS, TimeN = ");Serial.print(timeStart); Serial.print("  "); Serial.println(timeNow);
       moveControl();
       timeNow = millis();
     }
+    
+
     stopCar();
         
       

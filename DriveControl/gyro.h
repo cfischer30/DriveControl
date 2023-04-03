@@ -83,6 +83,6 @@ void readAngle(){
   //combine accelerometer- and gyro-estimated angle values. 0.96 and 0.04 values are determined through trial and error by other people
   roll = 0.96 * gyroAngleX + 0.04 * accAngleX;
   pitch = 0.96 * gyroAngleY + 0.04 * accAngleY;
-  angle = roll; //if you mounted MPU6050 in a different orientation to me, angle may not = roll. It can roll, pitch, yaw or minus version of the three
+  currentAngle = yaw; //MPU6050 oriented flat
   //for me, turning right reduces angle. Turning left increases angle.
 };

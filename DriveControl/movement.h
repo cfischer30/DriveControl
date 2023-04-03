@@ -32,13 +32,49 @@ void moveControl(){
   GyroY -= GyroErrorY;
   GyroZ -= GyroErrorZ;
   yaw += GyroZ * elapsedTime;
-  angle = yaw;
-  Serial.print("Current Angle = ");Serial.println(angle);
+  currentAngle = yaw;
+  Serial.print("Current Angle = ");Serial.println(currentAngle);
   driving();
   }
+  
+  
+  // rewritten driving() function by Chris Fischer
+  
+  void driving(){   // called my moveControl
+  forward();   // sets forward & reverse pins appropriately on H bridge
+	deltaAngle = targetAngle - currentAngle;
+	speedCorrection = int(deltaAngle * proportionalRate);
+	
+	rightSpeedVal = targetSpeed + speedCorrection;
+	if(rightSpeedVal > maxSpeed)
+		{rightSpeedVal = maxSpeed;}
+	else if(rightSpeedVal < minSpeed)
+		{rightSpeedVal = minSpeed;}
+		
+	leftSpeedVal = targetSpeed - speedCorrection;
+	if(leftSpeedVal > maxSpeed)
+		{leftSpeedVal = maxSpeed;}
+	else if (leftSpeedVal < minSpeed)
+		{leftSpeedVal = minSpeed;}
+		
+	Serial.print("deltaAngle = ");Serial.println(deltaAngle);  	
+	Serial.print("left right speed "); 
+    Serial.print(leftSpeed); Serial.print(" "); Serial.println(rightSpeed);  
+
+  Serial.print(leftSpeedVal); Serial.print(" "); Serial.println(rightSpeedVal);  
+		
+	analogWrite(rightSpeed, rightSpeedVal);
+  analogWrite(leftSpeed, leftSpeedVal);
+	
+	
+		
+  }
+		
 
 
 
+
+/* Original "driving" function
 
 void driving (){//called by void loop(), which isDriving = true
   int deltaAngle = round(targetAngle - angle); //rounding is neccessary, since you never get exact values in reality
@@ -58,9 +94,9 @@ void driving (){//called by void loop(), which isDriving = true
     analogWrite(leftSpeed, leftSpeedVal);
   }
 }
-
+*/
 void controlSpeed(){//this function is called by driving ()
-  int deltaAngle = round(targetAngle - angle);
+  int deltaAngle = round(targetAngle - currentAngle);
   int targetGyroZ;
   
   //setting up propoertional control, see Step 3 on the website
@@ -84,15 +120,15 @@ void controlSpeed(){//this function is called by driving ()
 }
 
 void rotate (){//called by void loop(), which isDriving = false
-  int deltaAngle = round(targetAngle - angle);
+  int deltaAngle = round(targetAngle - currentAngle);
   Serial.print("deltaAngle = "); Serial.println(deltaAngle);
   int targetGyroZ;
   if (abs(deltaAngle) <= 1){
     stopCar();
   } else {
-    if (angle > targetAngle) { //turn left
+    if (currentAngle > targetAngle) { //turn left
       left();
-    } else if (angle < targetAngle) {//turn right
+    } else if (currentAngle < targetAngle) {//turn right
       right();
     }
 

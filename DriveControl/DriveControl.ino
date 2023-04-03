@@ -11,14 +11,17 @@ float roll, pitch, yaw;
 float AccErrorX, AccErrorY, GyroErrorX, GyroErrorY, GyroErrorZ;
 float elapsedTime, currentTime, previousTime;
 int c = 0;
-float proportionalRate = 10;
+float proportionalRate = 3; //speed adjustment per degree of error
 float maxRate = 120;
 
 const int maxSpeed = 255; //max PWM value written to motor speed pin. It is typically 255.
 const int minSpeed = 80; //min PWM value at which motor moves
-float angle; //due to how I orientated my MPU6050 on my car, angle = roll
+
+float currentAngle; //if MPU6050 is flat, angle = Z = yaw
 float targetAngle = 0;
+float deltaAngle;
 int targetSpeed = 180;
+int speedCorrection;
 float angleTolerance = .1;
 
 const int left1 = 4;
@@ -40,6 +43,7 @@ const int buttonPin = 8;
 
 void setup() {
   Serial.begin(115200);
+  Serial.println("started");
   Wire.begin();                      // Initialize comunication
   Wire.beginTransmission(MPU);       // Start communication with MPU6050 // MPU=0x68
   Wire.write(0x6B);                  // Talk to the register 6B
@@ -58,19 +62,24 @@ void loop() {
   if (digitalRead(buttonPin)==HIGH){
     Serial.println("Button Pushed");
     delay(1000);
-    targetAngle = 45;
-    Serial.print("CurrentAngle =");Serial.println(angle);
+    targetAngle = 0;
+    Serial.print("CurrentAngle =");Serial.println(currentAngle);
     Serial.print("TargetAngle = ");Serial.println(targetAngle);
     timeStart = millis();
     timeNow = millis();
     rightSpeedVal = targetSpeed;
     leftSpeedVal = targetSpeed;
-    while((timeNow-timeStart) < 5000){
+    while((timeNow-timeStart) < 10000){
       //Serial.print("TimeS, TimeN = ");Serial.print(timeStart); Serial.print("  "); Serial.println(timeNow);
       moveControl();
       timeNow = millis();
     }
-    
+    targetAngle -= 90;
+    while((timeNow-timeStart) < 4000){
+      moveControl();
+      timeNow = millis();
+      
+    }
 
     stopCar();
         

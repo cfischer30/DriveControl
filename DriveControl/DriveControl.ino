@@ -13,6 +13,7 @@ float elapsedTime, currentTime, previousTime;
 int c = 0;
 float proportionalRate = 3; //speed adjustment per degree of error
 float maxRate = 120;
+int duration;  // run duration in ms
 
 const int maxSpeed = 255; //max PWM value written to motor speed pin. It is typically 255.
 const int minSpeed = 80; //min PWM value at which motor moves
@@ -35,6 +36,7 @@ int leftSpeedVal, rightSpeedVal;
 
 #include "gyro.h"
 #include "movement.h"
+#include "readSerial.h"
 
 const int buttonPin = 8;
 
@@ -59,11 +61,24 @@ void setup() {
 void loop() {
   long int time0, timeStart, timeNow;
   // put your main code here, to run repeatedly:
-  if (digitalRead(buttonPin)==HIGH){
-    Serial.println("Button Pushed");
-    delay(1000);
+  //if (digitalRead(buttonPin)==HIGH){
+    //Serial.println("Button Pushed");
+    //delay(1000);
     targetAngle = 0;
-    Serial.print("CurrentAngle =");Serial.println(currentAngle);
+
+    if(readSerial() > 0){
+      forward();
+      rightSpeedVal = targetSpeed;
+      leftSpeedVal = targetSpeed;
+      timeStart = millis();
+      timeNow = millis();
+      while((timeNow - timeStart) < duration){
+        moveControl();
+        timeNow = millis();
+      }            
+      stopCar();    
+
+   /* Serial.print("CurrentAngle =");Serial.println(currentAngle);
     Serial.print("TargetAngle = ");Serial.println(targetAngle);
     timeStart = millis();
     timeNow = millis();
@@ -79,7 +94,7 @@ void loop() {
       moveControl();
       timeNow = millis();
       
-    }
+    }*/
 
     stopCar();
         

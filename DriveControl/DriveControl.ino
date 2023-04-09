@@ -2,7 +2,8 @@
 #include <Adafruit_Sensor.h>
 #include <Wire.h>
 
-
+const int baudRate = 9600;
+// const int baudRate = 119200;
 const int MPU = 0x68; // MPU6050 I2C address
 float AccX, AccY, AccZ; //linear acceleration
 float GyroX, GyroY, GyroZ; //angular velocity
@@ -34,9 +35,23 @@ const int rightSpeed = 11;
 
 int leftSpeedVal, rightSpeedVal;
 
+// *** variables for new readSerial2.h
+const byte buffSize = 40;
+char inputBuffer[buffSize];
+const char startMarker = '<';
+const char endMarker = '>';
+byte bytesRecvd = 0;
+boolean readInProgress = false;
+boolean newDataFromPC = false;
+
+char messageFromPC[buffSize] = {0};
+
+// **** end new variable block
+
 #include "gyro.h"
 #include "movement.h"
 #include "readSerial.h"
+#include "readSerial2.h"
 
 const int buttonPin = 8;
 
@@ -44,8 +59,8 @@ const int buttonPin = 8;
 
 
 void setup() {
-  Serial.begin(115200);
-  Serial.println("started");
+  Serial.begin(baudRate);
+  //Serial.println("started");
   Wire.begin();                      // Initialize comunication
   Wire.beginTransmission(MPU);       // Start communication with MPU6050 // MPU=0x68
   Wire.write(0x6B);                  // Talk to the register 6B
@@ -55,6 +70,7 @@ void setup() {
   calculateError();
 
   pinMode(buttonPin,INPUT);
+  Serial.println("<Arduino is ready>");
 
 }
 
@@ -65,8 +81,12 @@ void loop() {
     //Serial.println("Button Pushed");
     //delay(1000);
     targetAngle = 0;
-
-    if(readSerial() > 0){
+    getDataFromPC();
+    duration = atoi(inputBuffer);
+    replyToPC();
+    //if(readSerial() > 0){
+    if(newDataFromPC){
+      newDataFromPC = false;
       forward();
       rightSpeedVal = targetSpeed;
       leftSpeedVal = targetSpeed;

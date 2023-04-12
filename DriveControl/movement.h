@@ -59,7 +59,7 @@ void moveControl(){
 		
 	Serial.print("deltaAngle = ");Serial.println(deltaAngle);  	
 	Serial.print("left right speed "); 
-    Serial.print(leftSpeed); Serial.print(" "); Serial.println(rightSpeed);  
+    //Serial.print(leftSpeed); Serial.print(" "); Serial.println(rightSpeed);  
 
   Serial.print(leftSpeedVal); Serial.print(" "); Serial.println(rightSpeedVal);  
 		
@@ -95,7 +95,9 @@ void driving (){//called by void loop(), which isDriving = true
   }
 }
 */
-void controlSpeed(){//this function is called by driving ()
+/*
+void controlSpeed(){//this function is called by original driving() function
+// obsolete in current implementation
   int deltaAngle = round(targetAngle - currentAngle);
   int targetGyroZ;
   
@@ -118,7 +120,7 @@ void controlSpeed(){//this function is called by driving ()
     leftSpeedVal = changeSpeed(leftSpeedVal, +1);
   }
 }
-
+*/
 void rotate (){//called by void loop(), which isDriving = false
   int deltaAngle = round(targetAngle - currentAngle);
   Serial.print("deltaAngle = "); Serial.println(deltaAngle);

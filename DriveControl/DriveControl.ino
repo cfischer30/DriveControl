@@ -3,7 +3,7 @@
 #include <Wire.h>
 
 const int baudRate = 9600;
-// const int baudRate = 119200;
+// const int baudRate = 115200;
 
 const int MPU = 0x68; // MPU6050 I2C address
 float AccX, AccY, AccZ; //linear acceleration
@@ -13,7 +13,7 @@ float roll, pitch, yaw;
 float AccErrorX, AccErrorY, GyroErrorX, GyroErrorY, GyroErrorZ;
 float elapsedTime, currentTime, previousTime;
 int c = 0;
-float proportionalRate = 3; //speed adjustment per degree of error
+float proportionalRate = 1; //speed adjustment per degree of error
 float maxRate = 120;
 int duration;  // run duration in ms
 
@@ -27,18 +27,21 @@ int targetSpeed = 180;
 int speedCorrection;
 float angleTolerance = .1;
 
-const int left1 = 4;  //for L298N control
-//const int left1 = 2; // MD20A control
+
+// for an H bridge with single pin direction control, use only pins left1 and right1
+//const int left1 = 4;  //for L298N control
+const int left1 = 4; // MD20A control
 const int left2 = 5;     // ignored in MD20A
+//const int right1 = 7;   // for L298n control
+const int right1 = 7;  // for MD20A
 const int right2 = 6;    // ignored in MD20A
 
- const int right1 = 7;   // for L298n control
-//const int right1 = 4;  // for MD20A
-// for an H bridge with single pin direction control, use only pins left1 and right1
- const int leftSpeed = 10;  // L298N
-//const int leftSpeed = 3;      // MD20A
- const int rightSpeed = 11;   //L298N
-//const int rightSpeed = 5;   // MD20A
+
+
+// const int leftSpeed = 10;  // L298N
+const int leftSpeed = 10;      // MD20A
+// const int rightSpeed = 11;   //L298N
+const int rightSpeed = 11;   // MD20A
 
 int leftSpeedVal, rightSpeedVal;
 
@@ -84,9 +87,7 @@ void setup() {
 void loop() {
   long int time0, timeStart, timeNow;
   // put your main code here, to run repeatedly:
-  //if (digitalRead(buttonPin)==HIGH){
-    //Serial.println("Button Pushed");
-    //delay(1000);
+  
     targetAngle = 0;
     getDataFromPC();
     duration = atoi(inputBuffer);
@@ -94,7 +95,7 @@ void loop() {
     //if(readSerial() > 0){
     if(newDataFromPC){
       newDataFromPC = false;
-      forward();
+      forward();   // sets direction pins, not movement
       rightSpeedVal = targetSpeed;
       leftSpeedVal = targetSpeed;
       timeStart = millis();
@@ -104,6 +105,25 @@ void loop() {
         timeNow = millis();
       }            
       stopCar();    
+    }
+
+  // button controlled start for testing
+  if (digitalRead(buttonPin)==HIGH){
+    Serial.println("Button Pushed");
+    delay(1000);
+    duration = 4000;
+    targetAngle = 0;
+     rightSpeedVal = targetSpeed;
+      leftSpeedVal = targetSpeed;
+      timeStart = millis();
+      timeNow = millis();
+      while((timeNow - timeStart) < duration){
+        moveControl();
+        timeNow = millis();
+      }            
+      stopCar(); 
+  
+
 
    /* Serial.print("CurrentAngle =");Serial.println(currentAngle);
     Serial.print("TargetAngle = ");Serial.println(targetAngle);

@@ -7,11 +7,6 @@ from FindArduinoPort import *
 from FindArduinoPort import *
 
 
-
-
-
-
-
 def sendBytes(td):
     numLoops = len(td)
 
@@ -30,14 +25,14 @@ def initArduino():
     print("Serial port " + arduinoPort + " opened  Baudrate " + str(baudRate))
     time.sleep(3)  #3 second pause to allow connection to be made
 
-    startMarker = 60  # < sign
-    endMarker = 62    # > sign
+    
 
-def sendInt(value):
-    print('sending ', value)
+def sendInt(value1, value2):
+    print('sending ', value1, value2)
     sendData = []
-    valueString = str(value)
-    sendString = '<' + valueString + '>'
+    valueString1 = str(value1)
+    valueString2 = str(value2)
+    sendString = '<' + valueString1 + '|' + valueString2 + '>'
     arg = bytes(sendString,'ascii')
     sendData.append(arg)
     sendBytes(sendData)

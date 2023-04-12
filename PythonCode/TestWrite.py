@@ -1,11 +1,15 @@
+# tested April 11, 2023.   Works with WriteToArduino.py
+#  
+
 from WriteToArduino import *
 
 
 
 initArduino()
 
-value = 4000
+angle = 5
+duration = 5
 
-sendInt(value)
+sendInt(angle, duration)
 
 closeArduino()

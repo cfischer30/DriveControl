@@ -2,8 +2,9 @@ void getDataFromPC() {
 
     // receive data from PC and save it into inputBuffer
     
-  //if(Serial.available() > 0) {
-    while(Serial.available() > 0){
+  if(Serial.available() > 0) {
+
+    
 
     char x = Serial.read();
 
@@ -16,14 +17,7 @@ void getDataFromPC() {
       //parseData();
     }
     
-   /* if(readInProgress) {
-      inputBuffer[bytesRecvd] = x;
-      bytesRecvd ++;
-      if (bytesRecvd == buffSize) {
-        bytesRecvd = buffSize - 1;
-      }
-    } */
-   if(x == splitMarker){
+    if(x == splitMarker){
       isSplit = 1;
       bytesRecvd ++;
     }
@@ -39,7 +33,8 @@ void getDataFromPC() {
       if (bytesRecvd == buffSize) {
         bytesRecvd = buffSize - 1;
       }
-    }    
+    }
+
 
     if (x == startMarker) { 
       bytesRecvd = 0; 
@@ -48,21 +43,16 @@ void getDataFromPC() {
   }
 }
 
-void replyToPC() {
 
-  if (newDataFromPC) {
-    //newDataFromPC = false;
-    Serial.print("<Msg ");
- /*   Serial.print(messageFromPC);
-    Serial.print(" NewFlash ");
-    Serial.print(newFlashInterval);
-    Serial.print(" SrvFrac ");
-    Serial.print(servoFraction);
-    Serial.print(" SrvPos ");
-    Serial.print(newServoPos);
-    Serial.print(" Time ");
-    Serial.print(curMillis >> 9); // divide by 512 is approx = half-seconds 
-    */
-    Serial.println(">");
-  }
-}
+From Main:
+
+const byte buffSize = 40;
+char inputBuffer[buffSize];
+char inputBuffer2[buffSize];
+const char startMarker = '<';
+const char endMarker = '>';
+const char splitMarker = '|';
+int isSplit;
+byte bytesRecvd = 0;
+boolean readInProgress = false;
+boolean newDataFromPC = false;

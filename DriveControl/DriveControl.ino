@@ -28,7 +28,7 @@ int speedCorrection;
 float angleTolerance = .1;
 
 // const int left1 = 4;  //for L298N control
-const int left1 = 2 // MD20A control
+const int left1 = 2; // MD20A control
 const int left2 = 5;     // ignored in MD20A
 const int right2 = 6;    // ignored in MD20A
 
@@ -43,10 +43,22 @@ const int rightSpeed = 5;   // MD20A
 int leftSpeedVal, rightSpeedVal;
 
 // *** variables for new readSerial2.h
-const byte buffSize = 40;
+//Modifying variable block to accept 2 variabls from 
+
+/* const byte buffSize = 40;
 char inputBuffer[buffSize];
 const char startMarker = '<';
 const char endMarker = '>';
+byte bytesRecvd = 0;
+boolean readInProgress = false;
+boolean newDataFromPC = false; */
+const byte buffSize = 40;
+char inputBuffer[buffSize];
+char inputBuffer2[buffSize];
+const char startMarker = '<';
+const char endMarker = '>';
+const char splitMarker = '|';
+int isSplit;
 byte bytesRecvd = 0;
 boolean readInProgress = false;
 boolean newDataFromPC = false;
@@ -75,8 +87,10 @@ void setup() {
   Wire.endTransmission(true);        //end the transmission
   // Call this function if you need to get the IMU error values for your module
   calculateError();
+  
 
   pinMode(buttonPin,INPUT);
+  pinMode(LED_BUILTIN, OUTPUT);
   Serial.println("<Arduino is ready>");
 
 }
@@ -87,11 +101,16 @@ void loop() {
   //if (digitalRead(buttonPin)==HIGH){
     //Serial.println("Button Pushed");
     //delay(1000);
-    targetAngle = 0;
     getDataFromPC();
-    duration = atoi(inputBuffer);
-    replyToPC();
+    targetAngle = atoi(inputBuffer);
+    duration = atoi(inputBuffer2);
+    //replyToPC();
     //if(readSerial() > 0){
+
+    /*  comment out drive control to test communication
+    // uncomment this block to drive car
+
+  
     if(newDataFromPC){
       newDataFromPC = false;
       forward();
@@ -102,7 +121,24 @@ void loop() {
       while((timeNow - timeStart) < duration){
         moveControl();
         timeNow = millis();
-      }            
+      }  */     
+
+      // use blinking LED to test communication
+      if(newDataFromPC){
+        newDataFromPC = false;
+        for (int i = 1; i <= targetAngle+duration; i++){
+          digitalWrite(LED_BUILTIN, HIGH);
+          delay(500);
+          digitalWrite(LED_BUILTIN, LOW);
+          delay(500);      
+        }
+          delay(3000);
+          for (int i = 1; i <= duration; i++){
+          digitalWrite(LED_BUILTIN, HIGH);
+          delay(500);
+          digitalWrite(LED_BUILTIN, LOW);
+          delay(500);  
+        }  
       stopCar();    
 
    /* Serial.print("CurrentAngle =");Serial.println(currentAngle);

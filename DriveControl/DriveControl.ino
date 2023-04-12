@@ -27,18 +27,18 @@ int targetSpeed = 180;
 int speedCorrection;
 float angleTolerance = .1;
 
-// const int left1 = 4;  //for L298N control
-const int left1 = 2 // MD20A control
+const int left1 = 4;  //for L298N control
+//const int left1 = 2; // MD20A control
 const int left2 = 5;     // ignored in MD20A
 const int right2 = 6;    // ignored in MD20A
 
-// const int right1 = 7;   // for L298n control
-const int right1 = 4;  // for MD20A
+ const int right1 = 7;   // for L298n control
+//const int right1 = 4;  // for MD20A
 // for an H bridge with single pin direction control, use only pins left1 and right1
-// const int leftSpeed = 10;  // L298N
-const int leftSpeed = 3;      // MD20A
-// const int rightSpeed = 11;
-const int rightSpeed = 5;   // MD20A
+ const int leftSpeed = 10;  // L298N
+//const int leftSpeed = 3;      // MD20A
+ const int rightSpeed = 11;   //L298N
+//const int rightSpeed = 5;   // MD20A
 
 int leftSpeedVal, rightSpeedVal;
 

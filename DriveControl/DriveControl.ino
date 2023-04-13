@@ -15,7 +15,7 @@ float elapsedTime, currentTime, previousTime;
 int c = 0;
 float proportionalRate = 1; //speed adjustment per degree of error
 float maxRate = 120;
-int maxDuration = 5000;  // run duration in ms
+int maxDuration = 600000;  // run duration in ms
 
 const int maxSpeed = 255; //max PWM value written to motor speed pin. It is typically 255.
 const int minSpeed = 80; //min PWM value at which motor moves
@@ -83,6 +83,9 @@ void setup() {
 
   pinMode(buttonPin,INPUT);
   Serial.println("<Arduino is ready>");
+  analogWrite(10, 100);
+  analogWrite(11, 100);
+  delay(1000);
 
 }
 
@@ -93,15 +96,20 @@ void loop() {
     //targetAngle = 0;
     getDataFromPC();
     readValue = atoi(inputBuffer);
-    // append 1000000 for speed
-    // append 2000000 for angle
-    if (readValue < 2000000) {
+    // append 10000 for speed
+    // append 20000 for angle
+    if ((readValue < 12000) && newDataFromPC) {
+      Serial.print(readValue);
       dataIsSpeed = 1;
-      actValue = readValue - 1000000;      
+      actValue = readValue - 10000;  
+      Serial.print("Speed = ");
+      Serial.println(actValue);    
     }
-    else if (readValue < 3000000 ){
+    else if ((readValue < 30000 )&& newDataFromPC){
       dataIsAngle = 1;
-      actValue = readValue - 2000000;  
+      actValue = readValue - 20000;  
+      Serial.print("Target Angle = ");
+      Serial.println(actValue);
       }
     if (dataIsSpeed == 1){
          targetSpeed = actValue;  
@@ -109,39 +117,45 @@ void loop() {
     }
     if (dataIsAngle == 1){
         targetAngle = actValue;
-        dataIsAngle = 0;        
+        dataIsAngle = 0;   
+        Serial.print("targetAngle = ");
+        Serial.println(targetAngle);      
     }
     //duration = atoi(inputBuffer);
     replyToPC();
+    
     //if(readSerial() > 0){
     if(newDataFromPC){
       newDataFromPC = false;
       forward();   // sets direction pins, not movement
       rightSpeedVal = targetSpeed;
       leftSpeedVal = targetSpeed;
+      //Serial.println("Target Speed = ");
+      //Serial.println(targetSpeed);
       timeStart = millis();
       timeNow = millis();
-      if((timeNow - timeStart) < maxDuration){
-        stopCar;
-      }            
+      //if((timeNow - timeStart) < maxDuration){
+      //  stopCar;
+      //}            
          
     }
 
   // button controlled start for testing
-  if (digitalRead(buttonPin)==HIGH){
-    Serial.println("Button Pushed");
-    delay(1000);
+  if (digitalRead(buttonPin)==LOW){
+    //Serial.println("Button Pushed");
+    delay(1);
     maxDuration = 2000;
-    targetAngle = 0;
+   // targetAngle = 0;
     rightSpeedVal = targetSpeed;
     leftSpeedVal = targetSpeed;
     timeStart = millis();
     timeNow = millis();
-    while((timeNow - timeStart) < maxDuration){
+    moveControl();
+   /* while((timeNow - timeStart) < maxDuration){
       moveControl();
       timeNow = millis();
-    }            
-  stopCar(); 
+    }   */         
+  //stopCar(); 
   
 
 
@@ -163,7 +177,7 @@ void loop() {
       
     }*/
 
-    stopCar();
+    //stopCar();
         
       
     

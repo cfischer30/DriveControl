@@ -4,13 +4,13 @@ initArduino()
 
 
 void sendAngle(angle){
-    angle += 1000000
+    angle += 10000
     sendInt(angle)   
     }
 
 
 void sendSpeed(speed){
-    angle += 2000000
+    angle += 20000
     sendInt(speed)
     }
 

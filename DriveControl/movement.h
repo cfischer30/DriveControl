@@ -33,7 +33,7 @@ void moveControl(){
   GyroZ -= GyroErrorZ;
   yaw += GyroZ * elapsedTime;
   currentAngle = yaw;
-  Serial.print("Current Angle = ");Serial.println(currentAngle);
+  //Serial.print("Current Angle = ");Serial.println(currentAngle);
   if(targetSpeed == 0){
     rotate();    
   }
@@ -64,14 +64,16 @@ void moveControl(){
 	else if (leftSpeedVal < minSpeed)
 		{leftSpeedVal = minSpeed;}
 		
-	Serial.print("deltaAngle = ");Serial.println(deltaAngle);  	
-	Serial.print("left right speed "); 
+//	Serial.print("deltaAngle = ");Serial.println(deltaAngle);  	
+//	Serial.print("left right speed "); 
     //Serial.print(leftSpeed); Serial.print(" "); Serial.println(rightSpeed);  
 
-  Serial.print(leftSpeedVal); Serial.print(" "); Serial.println(rightSpeedVal);  
+  //Serial.print(leftSpeedVal); Serial.print(" "); Serial.println(rightSpeedVal);  
 		
-	analogWrite(rightSpeed, rightSpeedVal);
-  analogWrite(leftSpeed, leftSpeedVal);
+	analogWrite(10, rightSpeedVal);
+
+  analogWrite(11, leftSpeedVal);
+  delay(100);  
 	
 	
 		

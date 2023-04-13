@@ -32,7 +32,7 @@ while (Serial.available() > 0){
     else{
       inputString[messagePos] = '\0';
       Serial.println(inputString);
-      duration = atoi(inputString);
+      maxDuration = atoi(inputString);
 
       messagePos = 0;   
     }

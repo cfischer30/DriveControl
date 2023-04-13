@@ -34,7 +34,14 @@ void moveControl(){
   yaw += GyroZ * elapsedTime;
   currentAngle = yaw;
   Serial.print("Current Angle = ");Serial.println(currentAngle);
-  driving();
+  if(targetSpeed == 0){
+    rotate();    
+  }
+  else{ 
+     driving();
+  }
+  
+ 
   }
   
   

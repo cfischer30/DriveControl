@@ -15,7 +15,7 @@ float elapsedTime, currentTime, previousTime;
 int c = 0;
 float proportionalRate = 1; //speed adjustment per degree of error
 float maxRate = 120;
-int duration;  // run duration in ms
+int maxDuration = 5000;  // run duration in ms
 
 const int maxSpeed = 255; //max PWM value written to motor speed pin. It is typically 255.
 const int minSpeed = 80; //min PWM value at which motor moves
@@ -26,6 +26,8 @@ float deltaAngle;
 int targetSpeed = 180;
 int speedCorrection;
 float angleTolerance = .1;
+int dataIsSpeed = 0;
+int dataIsAngle = 0;
 
 
 // for an H bridge with single pin direction control, use only pins left1 and right1
@@ -53,7 +55,7 @@ const char endMarker = '>';
 byte bytesRecvd = 0;
 boolean readInProgress = false;
 boolean newDataFromPC = false;
-
+int readValue, actValue;
 char messageFromPC[buffSize] = {0};
 
 // **** end new variable block
@@ -88,9 +90,28 @@ void loop() {
   long int time0, timeStart, timeNow;
   // put your main code here, to run repeatedly:
   
-    targetAngle = 0;
+    //targetAngle = 0;
     getDataFromPC();
-    duration = atoi(inputBuffer);
+    readValue = atoi(inputBuffer);
+    // append 1000000 for speed
+    // append 2000000 for angle
+    if (readValue < 2000000) {
+      dataIsSpeed = 1;
+      actValue = readValue - 1000000;      
+    }
+    else if (readValue < 3000000 ){
+      dataIsAngle = 1;
+      actValue = readValue - 2000000;  
+      }
+    if (dataIsSpeed == 1){
+         targetSpeed = actValue;  
+         dataIsSpeed = 0; 
+    }
+    if (dataIsAngle == 1){
+        targetAngle = actValue;
+        dataIsAngle = 0;        
+    }
+    //duration = atoi(inputBuffer);
     replyToPC();
     //if(readSerial() > 0){
     if(newDataFromPC){
@@ -100,28 +121,27 @@ void loop() {
       leftSpeedVal = targetSpeed;
       timeStart = millis();
       timeNow = millis();
-      while((timeNow - timeStart) < duration){
-        moveControl();
-        timeNow = millis();
+      if((timeNow - timeStart) < maxDuration){
+        stopCar;
       }            
-      stopCar();    
+         
     }
 
   // button controlled start for testing
   if (digitalRead(buttonPin)==HIGH){
     Serial.println("Button Pushed");
     delay(1000);
-    duration = 4000;
+    maxDuration = 2000;
     targetAngle = 0;
-     rightSpeedVal = targetSpeed;
-      leftSpeedVal = targetSpeed;
-      timeStart = millis();
+    rightSpeedVal = targetSpeed;
+    leftSpeedVal = targetSpeed;
+    timeStart = millis();
+    timeNow = millis();
+    while((timeNow - timeStart) < maxDuration){
+      moveControl();
       timeNow = millis();
-      while((timeNow - timeStart) < duration){
-        moveControl();
-        timeNow = millis();
-      }            
-      stopCar(); 
+    }            
+  stopCar(); 
   
 
 

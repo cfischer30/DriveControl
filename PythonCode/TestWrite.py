@@ -3,16 +3,14 @@ from WriteToArduino import *
 initArduino()
 
 
-void sendAngle(angle){
-    angle += 10000
-    sendInt(angle)   
-    }
-
-
-void sendSpeed(speed){
+def sendAngle(angle):
     angle += 20000
+    sendInt(angle)
+
+
+def sendSpeed(speed):
+    speed += 10000
     sendInt(speed)
-    }
 
 
 sendSpeed(140);

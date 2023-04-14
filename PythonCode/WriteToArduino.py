@@ -23,7 +23,7 @@ def sendBytes(td):
 
 
 def initArduino():
-    arduinoPort = findArduino()
+    arduinoPort = "/dev/ttyACM0"
     baudRate = 9600
     global ser
     ser = serial.Serial(arduinoPort, baudRate)

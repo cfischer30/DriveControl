@@ -73,7 +73,7 @@ void moveControl(){
 	analogWrite(10, rightSpeedVal);
 
   analogWrite(11, leftSpeedVal);
-  delay(100);  
+  delay(1);  
 	
 	
 		
@@ -158,8 +158,8 @@ void rotate (){//called by void loop(), which isDriving = false
       leftSpeedVal = changeSpeed(leftSpeedVal, -1);
     }
     rightSpeedVal = leftSpeedVal;
-    analogWrite(rightSpeed, rightSpeedVal);
-    analogWrite(leftSpeed, leftSpeedVal);
+    analogWrite(rightSpeed, (rightSpeedVal*2.5));
+    analogWrite(leftSpeed, (leftSpeedVal*2.5));
   }
 }   
 
@@ -202,5 +202,3 @@ void stopCar(){
   analogWrite(rightSpeed, 0);
   analogWrite(leftSpeed, 0);
 }
-
-

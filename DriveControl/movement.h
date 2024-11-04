@@ -1,5 +1,5 @@
 /*   Available functions
-
+moveControl() is the primary function
 driving() - manages wheel speed while driving forward
 controlSpeed() - adjusts correction speed differential proportional to delta angle.  Called by driving()
 rotate() - rotates robot when not moving
@@ -36,12 +36,10 @@ void moveControl(){
   //Serial.print("Current Angle = ");Serial.println(currentAngle);
   if(targetSpeed == 0){
     rotate();    
-  }
+    }
   else{ 
      driving();
-  }
-  
- 
+    }
   }
   
   
@@ -64,72 +62,12 @@ void moveControl(){
 	else if (leftSpeedVal < minSpeed)
 		{leftSpeedVal = minSpeed;}
 		
-//	Serial.print("deltaAngle = ");Serial.println(deltaAngle);  	
-//	Serial.print("left right speed "); 
-    //Serial.print(leftSpeed); Serial.print(" "); Serial.println(rightSpeed);  
-
-  //Serial.print(leftSpeedVal); Serial.print(" "); Serial.println(rightSpeedVal);  
-		
 	analogWrite(10, rightSpeedVal);
 
   analogWrite(11, leftSpeedVal);
-  delay(1);  
+  delay(100);  
+  }
 	
-	
-		
-  }
-		
-
-
-
-
-/* Original "driving" function
-
-void driving (){//called by void loop(), which isDriving = true
-  int deltaAngle = round(targetAngle - angle); //rounding is neccessary, since you never get exact values in reality
-  Serial.print("deltaAngle = ");Serial.println(deltaAngle);  
-  forward();  // sets direction
-  //if (deltaAngle != 0){
-    if (abs(deltaAngle) > angleTolerance){
-   
-    Serial.print("before left right speed "); 
-    Serial.print(leftSpeedVal); Serial.print(" "); Serial.println(rightSpeedVal);    
-    controlSpeed ();
-   // rightSpeedVal = maxSpeed;
-    Serial.print("before left right speed "); 
-    Serial.print(leftSpeedVal); Serial.print(" "); Serial.println(rightSpeedVal);    
-    
-    analogWrite(rightSpeed, rightSpeedVal);
-    analogWrite(leftSpeed, leftSpeedVal);
-  }
-}
-*/
-/*
-void controlSpeed(){//this function is called by original driving() function
-// obsolete in current implementation
-  int deltaAngle = round(targetAngle - currentAngle);
-  int targetGyroZ;
-  
-  //setting up propoertional control, see Step 3 on the website
-  if (deltaAngle > 30){
-     // targetGyroZ = 60;
-     targetGyroZ = maxRate;
-  } else if (deltaAngle < -30){
-    // targetGyroZ = -60;
-    targetGyroZ = -maxRate;    
-  } else {
-    targetGyroZ = proportionalRate * deltaAngle;
-  }
-  
-  if (round(targetGyroZ - GyroZ) == 0){
-    ;
-  } else if (targetGyroZ > GyroZ){
-    leftSpeedVal = changeSpeed(leftSpeedVal, -1); //would increase GyroX
-  } else {
-    leftSpeedVal = changeSpeed(leftSpeedVal, +1);
-  }
-}
-*/
 void rotate (){//called by void loop(), which isDriving = false
   int deltaAngle = round(targetAngle - currentAngle);
   Serial.print("deltaAngle = "); Serial.println(deltaAngle);
@@ -158,8 +96,8 @@ void rotate (){//called by void loop(), which isDriving = false
       leftSpeedVal = changeSpeed(leftSpeedVal, -1);
     }
     rightSpeedVal = leftSpeedVal;
-    analogWrite(rightSpeed, (rightSpeedVal*2.5));
-    analogWrite(leftSpeed, (leftSpeedVal*2.5));
+    analogWrite(rightSpeed, rightSpeedVal);
+    analogWrite(leftSpeed, leftSpeedVal);
   }
 }   
 
@@ -202,3 +140,5 @@ void stopCar(){
   analogWrite(rightSpeed, 0);
   analogWrite(leftSpeed, 0);
 }
+
+

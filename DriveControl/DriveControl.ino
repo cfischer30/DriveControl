@@ -1,29 +1,53 @@
+
+/*   Drive Control
+By Chris Fischer
+Read data from serial and use to control direction and speed.
+Direction is compared to a MPU6050 6 axis accelerometer
+Nominal speed is controlled by motor PWM controls
+
+Speed is coded as 10xxx where xxx is speed (max 255)
+Angle is coded as 20xxx where xxx is the target angle (0-359)
+
+Ascii values should be sent with '<' and '>' as start and end 
+characters, respectively.
+
+So a speed of 155 should use the ascii string
+<10155>
+An angle of 97 should use the ascii string
+<20097>
+
+*/
 #include <Adafruit_MPU6050.h>
 #include <Adafruit_Sensor.h>
-#include <Wire.h>
+#include <Wire.h>  // I2C communication
+#include <LiquidCrystal_I2C.h>  // librar for I2C 2 row x 16 column LCD
+LiquidCrystal_I2C lcd(0x27,16,2);  // set the LCD address to 0x27 for a 16 chars and 2 line display
+
 
 const int baudRate = 9600;
 // const int baudRate = 115200;
 
+// accelerometer variables
 const int MPU = 0x68; // MPU6050 I2C address
 float AccX, AccY, AccZ; //linear acceleration
 float GyroX, GyroY, GyroZ; //angular velocity
 float accAngleX, accAngleY, gyroAngleX, gyroAngleY, gyroAngleZ; //used in void loop()
 float roll, pitch, yaw;
 float AccErrorX, AccErrorY, GyroErrorX, GyroErrorY, GyroErrorZ;
+
 float elapsedTime, currentTime, previousTime;
 int c = 0;
-float proportionalRate = 0.75; //speed adjustment per degree of error
+float proportionalRate = 1; //speed adjustment per degree of error
 float maxRate = 120;
-int maxDuration = 600000;  // run duration in ms
+long int maxDuration = 600000;  // run duration in ms
 
 const int maxSpeed = 255; //max PWM value written to motor speed pin. It is typically 255.
-const int minSpeed = 40; //min PWM value at which motor moves
+const int minSpeed = 80; //min PWM value at which motor moves
 
 float currentAngle; //if MPU6050 is flat, angle = Z = yaw
 float targetAngle = 0;
 float deltaAngle;
-int targetSpeed = 0;
+int targetSpeed = 180;
 int speedCorrection;
 float angleTolerance = .1;
 int dataIsSpeed = 0;
@@ -55,17 +79,28 @@ const char endMarker = '>';
 byte bytesRecvd = 0;
 boolean readInProgress = false;
 boolean newDataFromPC = false;
-int readValue, actValue;
+long int readValue, actValue; // maximum value of an standard integer is 32767.   
 char messageFromPC[buffSize] = {0};
 
 // **** end new variable block
 
 #include "gyro.h"
 #include "movement.h"
-#include "readSerial.h"
-#include "readSerial2.h"
+//#include "readSerial.h"
+//#include "readSerial2.h"
+
+
+// delaring variables for readSerial3 library
+const byte numChars = 32;
+char receivedChars[numChars];
+boolean newData = false;
+#include "readSerial3.h"   // read serial function from arduino website
+
+
 
 const int buttonPin = 8;
+
+
 
 
 
@@ -73,6 +108,7 @@ const int buttonPin = 8;
 void setup() {
   Serial.begin(baudRate);
   //Serial.println("started");
+  // setup I2C communication with accelerometer
   Wire.begin();                      // Initialize comunication
   Wire.beginTransmission(MPU);       // Start communication with MPU6050 // MPU=0x68
   Wire.write(0x6B);                  // Talk to the register 6B
@@ -81,13 +117,27 @@ void setup() {
   // Call this function if you need to get the IMU error values for your module
   calculateError();
 
-  pinMode(buttonPin,INPUT);
+  // setup LCD Display
+  lcd.init();
+  lcd.clear();         
+  lcd.backlight();      // Make sure backlight is on
+
+  pinMode(buttonPin,INPUT);   // start button on Aduino
   Serial.println("<Arduino is ready>");
-  analogWrite(10, 100);
-  analogWrite(11, 100);
-  delay(1);
-  analogWrite(10, 0);
-  analogWrite(11, 0);
+  analogWrite(leftSpeed, 100);  
+  analogWrite(rightSpeed, 100); 
+  lcd.setCursor(0,0);
+  lcd.print("speed");
+  lcd.setCursor(5,0);
+  lcd.print(targetSpeed);
+  lcd.setCursor(0,1);
+  lcd.print("CrAn");
+  lcd.setCursor(4,1);
+  lcd.print(currentAngle);
+  lcd.setCursor(9,1);
+  lcd.print("tar");
+  lcd.print(targetAngle);
+  delay(1000);
 
 }
 
@@ -95,59 +145,73 @@ void loop() {
   long int time0, timeStart, timeNow;
   // put your main code here, to run repeatedly:
   
-    //targetAngle = 0;
-    getDataFromPC();
-    readValue = atoi(inputBuffer);
+    
+   
+    recvWithStartEndMarkers(); // reads from serial and populates the variable receivedChars[]
+    readValue = atol(receivedChars);
+    if(newData){
+      Serial.print("Read Value = ");
+      Serial.println(readValue);
+      
+    }
+   
+    
     // append 10000 for speed
     // append 20000 for angle
-    if ((readValue < 12000) && newDataFromPC) {
-      Serial.print(readValue);
-      dataIsSpeed = 1;
+    if ((readValue < 10000) && newData ){
+      Serial.print("readValue = ");
+      Serial.println(readValue);
+      Serial.println("use 10000 + value for speed, 20000 + value for angle");
+      newData = false;
+      }
+    else if ((readValue < 12000) && newData) {
+      Serial.print("readValue = ");
+      Serial.println(readValue);
       actValue = readValue - 10000;  
       Serial.print("Speed = ");
-      Serial.println(actValue);    
-    }
-    else if ((readValue < 30000 )&& newDataFromPC){
+      Serial.println(actValue);
+      targetSpeed = actValue;
+      lcd.setCursor(5,0);
+      lcd.print("   ");
+      lcd.setCursor(5,0);
+      lcd.print(targetSpeed);
+      }
+    else if ((readValue < 30000 )&& newData){
       dataIsAngle = 1;
       actValue = readValue - 20000;  
       Serial.print("Target Angle = ");
       Serial.println(actValue);
+      targetAngle = actValue;
+      lcd.setCursor(12,1);
+      lcd.print("    ");
+      lcd.setCursor(12,1);
+      lcd.print(targetAngle);
       }
-    if (dataIsSpeed == 1){
-         targetSpeed = actValue;  
-         dataIsSpeed = 0; 
+    else if (newData){
+      Serial.println("New Data not processed");
+      newData = false;
     }
-    if (dataIsAngle == 1){
-        targetAngle = actValue;
-        dataIsAngle = 0;   
-        Serial.print("targetAngle = ");
-        Serial.println(targetAngle);      
-    }
-    //duration = atoi(inputBuffer);
-    replyToPC();
     
-    //if(readSerial() > 0){
-    if(newDataFromPC){
-      newDataFromPC = false;
+    
+    
+    
+    if(newData){
+      newData = false;
       forward();   // sets direction pins, not movement
       rightSpeedVal = targetSpeed;
       leftSpeedVal = targetSpeed;
-      //Serial.println("Target Speed = ");
-      //Serial.println(targetSpeed);
-      timeStart = millis();
-      timeNow = millis();
-      //if((timeNow - timeStart) < maxDuration){
-      //  stopCar;
-      //}            
+      
+      moveControl();
+       
          
     }
-
+    
   // button controlled start for testing
   if (digitalRead(buttonPin)==LOW){
     //Serial.println("Button Pushed");
     delay(1);
     maxDuration = 2000;
-   // targetAngle = 0;
+  
     rightSpeedVal = targetSpeed;
     leftSpeedVal = targetSpeed;
     timeStart = millis();
@@ -159,29 +223,8 @@ void loop() {
     }   */         
   //stopCar(); 
   
-
-
-   /* Serial.print("CurrentAngle =");Serial.println(currentAngle);
-    Serial.print("TargetAngle = ");Serial.println(targetAngle);
-    timeStart = millis();
-    timeNow = millis();
-    rightSpeedVal = targetSpeed;
-    leftSpeedVal = targetSpeed;
-    while((timeNow-timeStart) < 10000){
-      //Serial.print("TimeS, TimeN = ");Serial.print(timeStart); Serial.print("  "); Serial.println(timeNow);
-      moveControl();
-      timeNow = millis();
-    }
-    targetAngle -= 90;
-    while((timeNow-timeStart) < 4000){
-      moveControl();
-      timeNow = millis();
-      
-    }*/
-
-    //stopCar();
         
-      
+  
     
   }  
 

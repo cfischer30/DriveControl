@@ -21,7 +21,7 @@ An angle of 97 should use the ascii string
 #include <Adafruit_Sensor.h>
 #include <Wire.h>  // I2C communication
 #include <LiquidCrystal_I2C.h>  // librar for I2C 2 row x 16 column LCD
-LiquidCrystal_I2C lcd(0x27,16,2);  // set the LCD address to 0x27 for a 16 chars and 2 line display
+LiquidCrystal_I2C lcd(0x27,20,4);  // set the LCD address to 0x27 for a 20 column and 4 line display
 
 
 const int baudRate = 9600;
@@ -52,6 +52,8 @@ int speedCorrection;
 float angleTolerance = .1;
 int dataIsSpeed = 0;
 int dataIsAngle = 0;
+// lcd display variables
+int spdRow, spdCol, tarRow,tarCol,actRow,actCol;
 
 
 // for an H bridge with single pin direction control, use only pins left1 and right1
@@ -126,16 +128,23 @@ void setup() {
   Serial.println("<Arduino is ready>");
   analogWrite(leftSpeed, 100);  
   analogWrite(rightSpeed, 100); 
-  lcd.setCursor(0,0);
-  lcd.print("speed");
-  lcd.setCursor(5,0);
+  spdRow = 1;
+  lcd.setCursor(0,spdRow);
+  lcd.print("Target speed");
+  spdCol = 14;
+  lcd.setCursor(spdCol,spdRow);
   lcd.print(targetSpeed);
-  lcd.setCursor(0,1);
-  lcd.print("CrAn");
-  lcd.setCursor(4,1);
+  actRow = 2;
+  lcd.setCursor(0,actRow);
+  lcd.print("Current Angle ");
+  actCol = 14;
+  lcd.setCursor(actCol,actRow);
   lcd.print(currentAngle);
-  lcd.setCursor(9,1);
-  lcd.print("tar");
+  tarRow = 3;
+  lcd.setCursor(0,tarRow);
+  lcd.print("Target Angle ");
+  tarCol = 14;
+  lcd.setCursor(tarCol,tarRow);
   lcd.print(targetAngle);
   delay(1000);
 
@@ -171,9 +180,9 @@ void loop() {
       Serial.print("Speed = ");
       Serial.println(actValue);
       targetSpeed = actValue;
-      lcd.setCursor(5,0);
+      lcd.setCursor(spdCol,spdRow);
       lcd.print("   ");
-      lcd.setCursor(5,0);
+      lcd.setCursor(spdCol,spdRow);
       lcd.print(targetSpeed);
       }
     else if ((readValue < 30000 )&& newData){
@@ -182,9 +191,9 @@ void loop() {
       Serial.print("Target Angle = ");
       Serial.println(actValue);
       targetAngle = actValue;
-      lcd.setCursor(12,1);
+      lcd.setCursor(tarCol,tarRow);
       lcd.print("    ");
-      lcd.setCursor(12,1);
+      lcd.setCursor(tarCol,tarRow);
       lcd.print(targetAngle);
       }
     else if (newData){

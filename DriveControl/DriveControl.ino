@@ -49,11 +49,12 @@ float targetAngle = 0;
 float deltaAngle;
 int targetSpeed = 180;
 int speedCorrection;
+int correctionAngle;
 float angleTolerance = .1;
 int dataIsSpeed = 0;
 int dataIsAngle = 0;
 // lcd display variables
-int spdRow, spdCol, tarRow,tarCol,actRow,actCol;
+int spdRow, spdCol, tarRow,tarCol,actRow,actCol, corrRow, corrCol;
 
 
 // for an H bridge with single pin direction control, use only pins left1 and right1
@@ -97,6 +98,7 @@ const byte numChars = 32;
 char receivedChars[numChars];
 boolean newData = false;
 #include "readSerial3.h"   // read serial function from arduino website
+#include "compassRead.h"   // read azimuth angle from compass chip
 
 
 
@@ -118,6 +120,8 @@ void setup() {
   Wire.endTransmission(true);        //end the transmission
   // Call this function if you need to get the IMU error values for your module
   calculateError();
+  // initialize compass - define I2S and error
+  compassSetup();
 
   // setup LCD Display
   lcd.init();
@@ -128,23 +132,31 @@ void setup() {
   Serial.println("<Arduino is ready>");
   analogWrite(leftSpeed, 100);  
   analogWrite(rightSpeed, 100); 
-  spdRow = 1;
+  spdRow = 0;
   lcd.setCursor(0,spdRow);
   lcd.print("Target speed");
   spdCol = 14;
   lcd.setCursor(spdCol,spdRow);
   lcd.print(targetSpeed);
-  actRow = 2;
+  actRow = 1;
   lcd.setCursor(0,actRow);
   lcd.print("Current Angle ");
   actCol = 14;
   lcd.setCursor(actCol,actRow);
   lcd.print(currentAngle);
+  corrRow = 2;
+  lcd.setCursor(0, corrRow);
+  lcd.print("Correction");
+  corrCol = 14;
+  lcd.setCursor(corrCol, corrRow);
+  lcd.print(correctionAngle);
+ 
   tarRow = 3;
   lcd.setCursor(0,tarRow);
   lcd.print("Target Angle ");
   tarCol = 14;
   lcd.setCursor(tarCol,tarRow);
+  targetAngle = currentAngle + correctionAngle;
   lcd.print(targetAngle);
   delay(1000);
 
@@ -153,6 +165,11 @@ void setup() {
 void loop() {
   long int time0, timeStart, timeNow;
   // put your main code here, to run repeatedly:
+  currentAngle = float(readCompassAzimuth());
+  lcd.setCursor(actCol,actRow);
+  lcd.print("      ");
+  lcd.setCursor(actCol,actRow);
+  lcd.print(currentAngle);
   
     
    
@@ -188,9 +205,14 @@ void loop() {
     else if ((readValue < 30000 )&& newData){
       dataIsAngle = 1;
       actValue = readValue - 20000;  
-      Serial.print("Target Angle = ");
+      Serial.print("Correction Angle = ");
       Serial.println(actValue);
-      targetAngle = actValue;
+      correctionAngle = actValue;
+      targetAngle = currentAngle + correctionAngle;
+      lcd.setCursor(corrCol,corrRow);
+      lcd.print("      ");
+      lcd.setCursor(corrCol,corrRow);
+      lcd.print(correctionAngle);
       lcd.setCursor(tarCol,tarRow);
       lcd.print("    ");
       lcd.setCursor(tarCol,tarRow);

@@ -13,7 +13,7 @@
 int xMax = -9999, yMax = -9999, zMax = -9999;
 int xMin = 9999, yMin = 9999, zMin = 9999;
 //int xOffset = -3589, yOffset = -718, zOffset = -753;
-int xOffset = -3674, yOffset = -472, zOffset = 577;
+int xOffset = -3298, yOffset = -472, zOffset = 403;
 
 int compassZero = 0;
 
@@ -81,8 +81,9 @@ int readCompassAzimuth() {
   Serial.print("Z max: ");
   Serial.println(zMax);
   Serial.print("Z min: ");
-  Serial.println(zMin);
-  
+  Serial.println(zMin);*/
+
+  /* //uncomment to calibrate
   Serial.print("Xavg: ");
   Serial.println((xMax+xMin)/2.0);
   Serial.print("Yavg: ");
@@ -102,10 +103,10 @@ int readCompassAzimuth() {
   Serial.println(z - zOffset);*/
   a = int(atan2(double(x),double(z))*180.000/3.1415);
   //a = a - compassZero;
-  //if(a < 0){a = 360 + a;}
-  Serial.print("A Value: ");
+  if(a < 0){a = 360 + a;}
+  /*Serial.print("A Value: ");
   Serial.println(a);
-  Serial.println(" ");
+  Serial.println(" ");*/
   //delay(1000);
   
   return(a);

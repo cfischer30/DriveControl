@@ -76,11 +76,13 @@ void moveControl(){
   }
 	
 void rotate (){//called by void loop(), which isDriving = false
-  correctionAngle = round(targetAngle - currentAngle);
-  Serial.print("correctionAngle = "); Serial.println(correctionAngle);
+  //correctionAngle = round(targetAngle - currentAngle);
+  correctionAngle = findCorrectionAngle(currentAngle, targetAngle);
+  
+  //Serial.print("correctionAngle = "); Serial.println(correctionAngle);
   int targetZRate; // targetGyroZ is amount of yaw, regardless of  using Gyro or compass
   
-  if (abs(correctionAngle) <= 5){
+  if (abs(correctionAngle) <= angleTolerance){
     stopCar();
   } else {
     if (correctionAngle > 0) { //turn left
@@ -128,17 +130,17 @@ void forward(){ //drives the car forward, assuming leftSpeedVal and rightSpeedVa
 }
 
 void left(){ //rotates the car left, assuming speed leftSpeedVal and rightSpeedVal are set high enough
-  digitalWrite(right1, LOW);
-  digitalWrite(right2, HIGH);
-  digitalWrite(left1, HIGH);
-  digitalWrite(left2, LOW);
-}
-
-void right(){
   digitalWrite(right1, HIGH);
   digitalWrite(right2, LOW);
   digitalWrite(left1, LOW);
   digitalWrite(left2, HIGH);
+}
+
+void right(){
+  digitalWrite(right1, LOW);
+  digitalWrite(right2, HIGH);
+  digitalWrite(left1, HIGH);
+  digitalWrite(left2, LOW);
 }
 
 void stopCar(){

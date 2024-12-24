@@ -24,8 +24,8 @@ float targetAngle = 0;
 float deltaAngle;
 int targetSpeed = 0;
 int speedCorrection;
-int correctionAngle; */
-float angleTolerance = .5;
+int correctionAngle; 
+float angleTolerance = 7.0;*/
 
 
 

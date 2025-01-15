@@ -22,8 +22,8 @@ float proportionalRate = .1; //speed adjustment per degree of error
 float maxRate = 120;
 long int maxDuration = 600000;  // run duration in ms
 
-const int maxSpeed = 100; //max PWM value written to motor speed pin. It is typically 255.
-const int minSpeed = 100; //min PWM value at which motor moves
+const int maxSpeed = 120; //max PWM value written to motor speed pin. It is typically 255.
+const int minSpeed = 120; //min PWM value at which motor moves
 
 float currentAngle; //if MPU6050 is flat, angle = Z = yaw
 float targetAngle = 0;

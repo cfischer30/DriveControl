@@ -5,17 +5,17 @@
 // program assumes board is oriented horizontally (xz plane).
 
 
-#define addr 0x0D //I2C Address for The HMC5883
+#define addr 0x0D //I2C Address for The HMC5883  (confirmed)
 int xMax = -9999, yMax = -9999, zMax = -9999;
 int xMin = 9999, yMin = 9999, zMin = 9999;
-int xOffset = -2975, yOffset = -930, zOffset = -187;
+int xOffset = -1482, yOffset = -1151, zOffset = 684;
 
 
 void setup() {
 
   Serial.begin(9600);
   Wire.begin();
-
+  Serial.println("connected");
 
   Wire.beginTransmission(addr); //start talking
   Wire.write(0x0B); // Tell the HMC5883 to Continuously Measure
@@ -73,9 +73,8 @@ void loop() {
   Serial.println(z);
   a = int(atan2(double(x),double(z))*180.000/3.1415);
   if(a < 0){a = 360 + a;}
-  Serial.print("A Value: ");
-  Serial.println(a);
-  /*Serial.print("xMin: ");
+  
+  Serial.print("xMin: ");
   Serial.println(xMin);
   Serial.print("xMax: ");
   Serial.println(xMax);
@@ -86,6 +85,15 @@ void loop() {
   Serial.print("zMin: ");
   Serial.println(zMin);
   Serial.print("zMax: ");
-  Serial.println(zMax); */
+  Serial.println(zMax); 
+  Serial.print("xAvg ");
+  Serial.println((xMax+xMin)/2.0);
+  Serial.print("yAvg "); 
+  Serial.println((yMax+yMin)/2.0);
+  Serial.print("zAvg ");
+  Serial.println((zMax+zMin)/2.0);
+  Serial.print("A Value: ");
+  Serial.println(a);
+  Serial.println(" ");
   delay(2000);
 }
